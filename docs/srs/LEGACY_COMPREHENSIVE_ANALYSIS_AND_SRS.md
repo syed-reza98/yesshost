@@ -1,4 +1,4 @@
-# Comprehensive Codebase Analysis, Route Documentation, ERD & Software Requirements Specification (SRS)
+# Legacy Comprehensive Codebase Analysis, Route Documentation, ERD & Software Requirements Specification (SRS)
 
 **Project Name:** Yess Host Web Hosting & Cloud Management Platform  
 **Repository:** `yesshost`  
