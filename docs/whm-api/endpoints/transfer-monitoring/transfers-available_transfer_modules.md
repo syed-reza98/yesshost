@@ -1,0 +1,42 @@
+# Return available transfer modules
+
+This function lists all available transfer modules.
+
+Note:
+
+  For more information about how this function works with other functions in the transfer and restore process, read our
+  Guide to Transfer and Restore API Functions
+  documentation.
+
+Endpoint: GET /available_transfer_modules
+Version: 11.138.0.6
+Security: BasicAuth
+
+## Response 200 fields (application/json):
+
+  - `data` (object)
+
+  - `data.modules` (object)
+    The transfer module's information.
+    Example: {"AccountLocal":"5000","AccountRemoteRoot":"3000","AccountRemoteUser":"4000","FeatureListRemoteRoot":"1000","LegacyAccountBackup":"6000","PackageRemoteRoot":"2000"}
+
+  - `metadata` (object)
+
+  - `metadata.command` (string)
+    The method name called.
+    Example: "available_transfer_modules"
+
+  - `metadata.reason` (string)
+    The reason the API function failed when the metadata.result field is 0. This field may display a success message when a function succeeds.
+    Example: "OK"
+
+  - `metadata.result` (integer)
+    * 1 - Success.
+* 0 - Failed. Check the reason field for more details.
+    Enum: 0, 1
+
+  - `metadata.version` (integer)
+    The version of the API function.
+    Example: 1
+
+

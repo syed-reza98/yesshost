@@ -1,0 +1,40 @@
+# Remove completed restoration task
+
+This function removes a single completed task from the restoration queue.
+
+Endpoint: GET /restore_queue_clear_completed_task
+Version: 11.138.0.6
+Security: BasicAuth
+
+## Query parameters:
+
+  - `start_time` (integer, required)
+    When the restoration queue started the restoration.
+    Example: 1396065600
+
+  - `user` (string, required)
+    The cPanel account's username.
+    Example: "username"
+
+## Response 200 fields (application/json):
+
+  - `metadata` (object)
+
+  - `metadata.command` (string)
+    The method name called.
+    Example: "restore_queue_clear_completed_task"
+
+  - `metadata.reason` (string)
+    The reason the API function failed when the metadata.result field is 0. This field may display a success message when a function succeeds.
+    Example: "OK"
+
+  - `metadata.result` (integer)
+    * 1 — Success.
+* 0 — Failed. Check the reason field for more details.
+    Enum: 0, 1
+
+  - `metadata.version` (integer)
+    The version of the API function.
+    Example: 1
+
+
