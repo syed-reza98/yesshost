@@ -1,19 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { getLiveChatMessages, startLiveChat, sendLiveChatMessage } from "@/lib/dashboard.functions";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Smile, Phone, PhoneCall, Mail } from "lucide-react";
-import { Link } from "@/lib/router-compat";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import { supabase } from "@/integrations/supabase/client";
+import { MessageCircle, X, Send, Loader2, User, Mail, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useWebRTCCall } from "@/hooks/useWebRTCCall";
-import LiveChatCallUI from "@/components/LiveChatCallUI";
+import { toast } from "sonner";
 
 const CHAT_STORAGE_KEY = "yesshost_live_chat_id";
-const CHAT_OPEN_KEY = "yesshost_live_chat_open";
 
 type Message = {
   id: string;
@@ -22,10 +15,8 @@ type Message = {
   created_at: string;
 };
 
-const LiveChatWidget = () => {
-  const [open, setOpen] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem(CHAT_OPEN_KEY) === "true",
-  );
+export default function LiveChatWidget() {
+  const [open, setOpen] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -34,29 +25,10 @@ const LiveChatWidget = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [started, setStarted] = useState(false);
-  const [adminTyping, setAdminTyping] = useState(false);
-  const [showEmoji, setShowEmoji] = useState(false);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { lang } = useLanguage();
   const bn = lang === "bn";
 
-  const {
-    callStatus,
-    formattedDuration,
-    isMuted,
-    startCall,
-    endCall: endWebRTCCall,
-    toggleMute,
-  } = useWebRTCCall({ chatId, role: "visitor" });
-
-  // Persist open state
-  useEffect(() => {
-    localStorage.setItem(CHAT_OPEN_KEY, open ? "true" : "false");
-  }, [open]);
-
-  // Restore chat from localStorage; history is loaded through the server so the
-  // transcript is identical no matter which domain the widget is served from.
   useEffect(() => {
     const savedId = localStorage.getItem(CHAT_STORAGE_KEY);
     if (savedId) {
@@ -65,327 +37,220 @@ const LiveChatWidget = () => {
     }
   }, []);
 
-  const loadMessages = useServerFn(getLiveChatMessages);
-  const startChatFn = useServerFn(startLiveChat);
-  const sendChatMessage = useServerFn(sendLiveChatMessage);
-  const historyQuery = useQuery({
-    queryKey: ["live-chat", "messages", chatId],
-    queryFn: () => loadMessages({ data: { chatId: chatId as string } }),
-    enabled: !!chatId,
-    staleTime: 3_000,
-    // Visitor transcripts are private now, so the widget polls the server
-    // instead of relying on an anonymous realtime subscription.
-    refetchInterval: open ? 5_000 : false,
-  });
-
-  // Hydrate the server-rendered transcript into local state before the first
-  // interaction, then let realtime append to it.
-  const serverMessages = historyQuery.data?.messages;
-  useEffect(() => {
-    if (!serverMessages) return;
-    setMessages((prev) => {
-      const seen = new Set(serverMessages.map((m) => m.id));
-      return [...serverMessages, ...prev.filter((m) => !seen.has(m.id))];
-    });
-  }, [serverMessages]);
-
-  // Realtime subscription + typing indicator
+  // Native SSE stream for chat messages
   useEffect(() => {
     if (!chatId) return;
-    const channel = supabase
-      .channel(`live-chat-${chatId}`)
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "live_chat_messages",
-        filter: `chat_id=eq.${chatId}`,
-      }, (payload) => {
+
+    const eventSource = new EventSource(`/api/realtime/stream?chatId=${chatId}`);
+
+    eventSource.addEventListener("message", (e) => {
+      try {
+        const msg = JSON.parse(e.data);
         setMessages((prev) => {
-          if (prev.some(m => m.id === (payload.new as Message).id)) return prev;
-          return [...prev, payload.new as Message];
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [
+            ...prev,
+            {
+              id: msg.id,
+              sender_type: msg.senderType || msg.sender_type,
+              message: msg.message,
+              created_at: msg.createdAt || msg.created_at,
+            },
+          ];
         });
-        if ((payload.new as Message).sender_type === "admin") setAdminTyping(false);
-      })
-      .on("broadcast", { event: "typing" }, (payload) => {
-        if (payload.payload?.sender === "admin") {
-          setAdminTyping(true);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(() => setAdminTyping(false), 3000);
-        }
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+      } catch (err) {}
+    });
+
+    return () => {
+      eventSource.close();
+    };
   }, [chatId]);
 
-  const broadcastTyping = useCallback(() => {
-    if (!chatId) return;
-    const channel = supabase.channel(`live-chat-${chatId}`);
-    channel.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { sender: "visitor" },
-    }).catch(() => {});
-  }, [chatId]);
-
-  // Auto-scroll
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const startChat = async () => {
-    if (!name.trim() || !email.trim() || !phone.trim()) return;
-    try {
-      const { chatId: id } = await startChatFn({
-        data: {
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          greeting: bn
-            ? `হ্যালো ${name.trim()}! 👋 আপনাকে স্বাগতম। কিভাবে সাহায্য করতে পারি?`
-            : `Hello ${name.trim()}! 👋 Welcome! How can we help you?`,
-        },
-      });
-      localStorage.setItem(CHAT_STORAGE_KEY, id);
-      setChatId(id);
-      setStarted(true);
-    } catch (err) {
-      console.error("Could not start chat:", err);
-    }
-  };
+  const handleStartChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
 
-  const sendMessage = async () => {
-    const msg = input.trim();
-    if (!msg || !chatId) return;
-    setInput("");
     setSending(true);
     try {
-      const { message } = await sendChatMessage({ data: { chatId, message: msg } });
-      setMessages((prev) => (prev.some((m) => m.id === message.id) ? prev : [...prev, message]));
+      const res = await fetch("/api/support/chat/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.chatId) {
+        setChatId(data.chatId);
+        localStorage.setItem(CHAT_STORAGE_KEY, data.chatId);
+        setStarted(true);
+      } else {
+        toast.error("Failed to start chat session");
+      }
     } catch (err) {
-      console.error("Could not send message:", err);
+      toast.error("Network error");
     } finally {
       setSending(false);
     }
+  };
 
-    // Trigger AI auto-reply
-    setAdminTyping(true);
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || !chatId) return;
+
+    const text = input.trim();
+    setInput("");
+
+    // Optimistic UI
+    const tempId = crypto.randomUUID();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        sender_type: "visitor",
+        message: text,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
     try {
-      await supabase.functions.invoke("chat-ai-reply", {
-        body: { chat_id: chatId, message: msg, lang },
+      await fetch("/api/support/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatId,
+          senderType: "visitor",
+          message: text,
+        }),
       });
-      await historyQuery.refetch();
     } catch (err) {
-      console.error("AI reply error:", err);
-    } finally {
-      setAdminTyping(false);
+      toast.error("Message delivery failed");
     }
   };
 
-  const endChat = () => {
-    localStorage.removeItem(CHAT_STORAGE_KEY);
-    setChatId(null);
-    setMessages([]);
-    setStarted(false);
-    setName("");
-    setEmail("");
-    setPhone("");
-    setOpen(false);
-  };
-
-  const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString(bn ? "bn-BD" : "en-US", { hour: "2-digit", minute: "2-digit" });
-
   return (
     <>
-      {/* Contact popup button - above chat button */}
-      <AnimatePresence>
-        {!open && (
-          <>
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ delay: 0.05 }}
-              className="fixed bottom-[10rem] right-4 md:bottom-[6rem] md:right-6 z-50"
-            >
-              <Link
-                to="/contact"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-secondary border border-border text-foreground text-xs font-semibold shadow-lg hover:border-primary/40 hover:bg-secondary/80 transition-all"
-              >
-                <Phone className="w-3.5 h-3.5 text-primary" />
-                {bn ? "যোগাযোগ" : "Contact"}
-              </Link>
-            </motion.div>
+      {/* Floating Chat Trigger Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
+          aria-label="Live Chat"
+        >
+          {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        </button>
+      </div>
 
-            <motion.button
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              onClick={() => setOpen(true)}
-              data-livechat-trigger
-              className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:opacity-90 transition-opacity"
-            >
-              <MessageCircle className="w-6 h-6" />
-            </motion.button>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Chat window */}
+      {/* Chat Window Modal */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden glass-card-elevated border border-border shadow-2xl flex flex-col"
-            style={{ height: "460px" }}
+            className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[480px] bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="gradient-primary p-4 flex items-center justify-between shrink-0">
+            <div className="p-4 bg-primary text-primary-foreground flex items-center justify-between">
               <div>
-                <p className="text-primary-foreground font-bold text-sm">Yess Host Support</p>
-                <p className="text-primary-foreground/70 text-[10px]">
-                  {bn ? "সাধারণত কয়েক মিনিটে উত্তর দিই" : "We typically reply in a few minutes"}
-                </p>
+                <h3 className="font-bold text-sm">{bn ? "লাইভ সাপোর্ট চ্যাট" : "Live Support Chat"}</h3>
+                <p className="text-[11px] opacity-80">{bn ? "আমরা সাধারণত সাথে সাথেই উত্তর দিই" : "We typically reply within minutes"}</p>
               </div>
-              <div className="flex items-center gap-1">
-                {started && callStatus === "idle" && (
-                  <button
-                    onClick={startCall}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground transition-colors"
-                    title={bn ? "ভয়েস কল" : "Voice Call"}
-                  >
-                    <PhoneCall className="w-4 h-4" />
-                  </button>
-                )}
-                {started && (
-                  <button onClick={endChat} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground/70 text-[10px] font-medium transition-colors">
-                    {bn ? "শেষ" : "End"}
-                  </button>
-                )}
-                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-primary-foreground transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              <button onClick={() => setOpen(false)} className="opacity-80 hover:opacity-100">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Call UI */}
-            {started && (
-              <LiveChatCallUI
-                callStatus={callStatus}
-                formattedDuration={formattedDuration}
-                isMuted={isMuted}
-                onStartCall={startCall}
-                onEndCall={endWebRTCCall}
-                onToggleMute={toggleMute}
-                bn={bn}
-              />
-            )}
-
+            {/* Content */}
             {!started ? (
-              /* Pre-chat form */
-              <div className="flex-1 p-5 flex flex-col justify-center">
-                <div className="text-center mb-6">
-                  <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle className="w-7 h-7 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-base font-bold text-foreground">{bn ? "চ্যাট শুরু করুন" : "Start a Chat"}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{bn ? "আপনার তথ্য দিন" : "Enter your details"}</p>
-                </div>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={bn ? "আপনার নাম *" : "Your name *"}
-                    maxLength={100}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
-                  />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={bn ? "ইমেইল *" : "Email *"}
-                    maxLength={255}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
-                  />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={bn ? "ফোন নাম্বার *" : "Phone number *"}
-                    maxLength={20}
-                    className="w-full px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
-                  />
-                  <button
-                    onClick={startChat}
-                    disabled={!name.trim() || !email.trim() || !phone.trim()}
-                    className="w-full py-2.5 gradient-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
-                  >
-                    {bn ? "চ্যাট শুরু করুন" : "Start Chat"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Messages */}
-                <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {messages.map((m) => (
-                    <div key={m.id} className={`flex ${m.sender_type === "visitor" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
-                        m.sender_type === "visitor"
-                          ? "gradient-primary text-primary-foreground rounded-br-md"
-                          : "bg-secondary text-foreground rounded-bl-md"
-                      }`}>
-                        <p className="break-words whitespace-pre-wrap">{m.message}</p>
-                        <p className={`text-[9px] mt-1 ${m.sender_type === "visitor" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                          {formatTime(m.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {adminTyping && (
-                    <div className="flex justify-start px-1 pb-1">
-                      <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <form onSubmit={handleStartChat} className="p-6 space-y-4 flex-1 flex flex-col justify-center">
+                <p className="text-xs text-muted-foreground text-center">
+                  {bn ? "আমাদের সাপোর্ট এজেন্টের সাথে কথা বলতে আপনার তথ্য দিন" : "Please introduce yourself to start chatting with an agent"}
+                </p>
 
-                {/* Input */}
-                <div className="p-3 border-t border-border shrink-0 relative">
-                  {showEmoji && (
-                    <div className="absolute bottom-14 left-2 right-2 z-10">
-                      <Picker data={data} onEmojiSelect={(e: any) => { setInput(prev => prev + e.native); setShowEmoji(false); }} theme="dark" previewPosition="none" skinTonePosition="none" maxFrequentRows={1} perLine={7} />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5">
-                    <button onClick={() => setShowEmoji(!showEmoji)} className="p-2 rounded-xl hover:bg-secondary/70 text-muted-foreground transition-colors shrink-0">
-                      <Smile className="w-4 h-4" />
-                    </button>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <User className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
                     <input
                       type="text"
-                      value={input}
-                      onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
-                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                      onFocus={() => setShowEmoji(false)}
-                      placeholder={bn ? "মেসেজ লিখুন..." : "Type a message..."}
-                      maxLength={1000}
-                      className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:ring-1 focus:ring-primary/30"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={bn ? "আপনার নাম" : "Your Name"}
+                      className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-input bg-background"
                     />
-                    <button
-                      onClick={sendMessage}
-                      disabled={sending || !input.trim()}
-                      className="p-2.5 rounded-xl gradient-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all shrink-0"
-                    >
-                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={bn ? "ইমেইল এড্রেস (ঐচ্ছিক)" : "Email Address (Optional)"}
+                      className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-input bg-background"
+                    />
                   </div>
                 </div>
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {sending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {bn ? "চ্যাট শুরু করুন" : "Start Conversation"}
+                </button>
+              </form>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
+                  {messages.length === 0 ? (
+                    <div className="text-center text-xs text-muted-foreground py-8">
+                      {bn ? "চ্যাটে স্বাগতম! আপনার প্রশ্নটি লিখুন।" : "Welcome to live chat! How can we assist you today?"}
+                    </div>
+                  ) : (
+                    messages.map((m) => {
+                      const isVisitor = m.sender_type === "visitor";
+                      return (
+                        <div key={m.id} className={`flex ${isVisitor ? "justify-end" : "justify-start"}`}>
+                          <div
+                            className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-xs leading-relaxed ${
+                              isVisitor
+                                ? "bg-primary text-primary-foreground rounded-tr-none"
+                                : "bg-card text-foreground rounded-tl-none border border-border/60 shadow-sm"
+                            }`}
+                          >
+                            <p>{m.message}</p>
+                            <span className="text-[9px] opacity-60 block mt-1 text-right">
+                              {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                <form onSubmit={handleSend} className="p-3 border-t border-border/60 flex items-center gap-2 bg-card">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={bn ? "একটি বার্তা লিখুন..." : "Type your message..."}
+                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <button
+                    type="submit"
+                    className="p-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
               </>
             )}
           </motion.div>
@@ -393,6 +258,4 @@ const LiveChatWidget = () => {
       </AnimatePresence>
     </>
   );
-};
-
-export default LiveChatWidget;
+}

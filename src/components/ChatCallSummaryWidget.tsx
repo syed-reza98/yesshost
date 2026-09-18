@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, Phone, PhoneMissed, Clock, ChevronRight } from "lucide-react";
@@ -70,7 +71,7 @@ const ChatCallSummaryWidget = ({ userId, bn }: Props) => {
 
       // Fetch call history for user's chats
       if (chatData && chatData.length > 0) {
-        const chatIds = chatData.map((c) => c.id);
+        const chatIds = chatData.map((c: any) => c.id);
         const { data: callData } = await supabase
           .from("call_history")
           .select("*, live_chats(visitor_name)")

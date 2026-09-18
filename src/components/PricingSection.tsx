@@ -1,3 +1,4 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Star, ShoppingCart, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -107,7 +108,7 @@ const PricingSection = () => {
 
   useEffect(() => {
     supabase.from("pricing_plans").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }) => setDbPlans(data || []));
+      .then(({ data }: any) => setDbPlans(data || []));
   }, []);
 
   const tabs = [

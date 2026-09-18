@@ -1,3 +1,4 @@
+"use client";
 import { type LucideIcon } from "lucide-react";
 import { Link } from "@/lib/router-compat";
 import { motion } from "framer-motion";

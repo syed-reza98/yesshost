@@ -1,3 +1,4 @@
+"use client";
 import { Phone, MessageCircle, TicketCheck, Mail } from "lucide-react";
 import { useNavigate } from "@/lib/router-compat";
 import { motion } from "framer-motion";

@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback } from "react";
 import {
   Search, ArrowRight, Globe, CheckCircle2, XCircle, Loader2,
@@ -323,7 +324,7 @@ const DomainSearch = () => {
     setSuggestions([]);
     setSearchedName(name);
     supabase.functions.invoke("check-domain", { body: { domain: name + ".com" } })
-      .then(({ data, error }) => {
+      .then(({ data, error }: any) => {
         if (!error && data?.results) setResults(data.results);
         setLoading(false);
       })

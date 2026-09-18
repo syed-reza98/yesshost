@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Bell, Check, CheckCheck, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,7 +51,7 @@ const NotificationBell = () => {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-        (payload) => {
+        (payload: any) => {
           setNotifications((prev) => [payload.new as Notification, ...prev]);
         }
       )

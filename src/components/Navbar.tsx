@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -192,7 +193,7 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
         <Link to="/" className="flex items-center shrink-0 mr-4 xl:mr-8">
-          <img src={logoWhite} alt="Yess Host" className="h-8 lg:h-10" />
+          <img src={logoWhite.src} alt="Yess Host" className="h-8 lg:h-10" />
         </Link>
 
         {/* Desktop */}

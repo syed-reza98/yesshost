@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
@@ -11,7 +12,7 @@ import slideSecurity from "@/assets/slides/slide-security.jpg";
 
 const slides = [
   {
-    img: slideDatacenter,
+    img: slideDatacenter.src,
     titleBn: "বাংলাদেশের সেরা ডেটা সেন্টার",
     titleEn: "Bangladesh's Best Data Center",
     descBn: "হাই পারফরম্যান্স সার্ভার, ৯৯.৯% আপটাইম গ্যারান্টি এবং ২৪/৭ মনিটরিং।",
@@ -21,7 +22,7 @@ const slides = [
     link: "/#pricing",
   },
   {
-    img: slideTeam,
+    img: slideTeam.src,
     titleBn: "এক্সপার্ট সাপোর্ট টিম",
     titleEn: "Expert Support Team",
     descBn: "আমাদের দক্ষ ইঞ্জিনিয়ার টিম সবসময় আপনার পাশে — ২৪/৭ সাপোর্ট।",
@@ -31,7 +32,7 @@ const slides = [
     link: "/contact",
   },
   {
-    img: slideNetwork,
+    img: slideNetwork.src,
     titleBn: "গ্লোবাল নেটওয়ার্ক কানেক্টিভিটি",
     titleEn: "Global Network Connectivity",
     descBn: "বিশ্বব্যাপী ৬টি ডেটা সেন্টার থেকে আপনার কন্টেন্ট দ্রুত ডেলিভার করুন।",
@@ -41,7 +42,7 @@ const slides = [
     link: "/about",
   },
   {
-    img: slideSecurity,
+    img: slideSecurity.src,
     titleBn: "এন্টারপ্রাইজ-গ্রেড সিকিউরিটি",
     titleEn: "Enterprise-Grade Security",
     descBn: "ফ্রি SSL, DDoS প্রোটেকশন এবং অটোমেটেড ব্যাকআপ সহ সম্পূর্ণ সুরক্ষা।",

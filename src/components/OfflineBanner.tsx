@@ -1,3 +1,4 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff } from "lucide-react";
 import useOnlineStatus from "@/hooks/useOnlineStatus";

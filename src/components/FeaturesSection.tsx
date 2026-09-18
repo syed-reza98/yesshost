@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket, MousePointerClick, BarChart3, Shield, Headphones, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -17,7 +18,7 @@ const FeaturesSection = () => {
   useEffect(() => {
     supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
       .order("sort_order")
-      .then(({ data }) => setSiteContent(data || []));
+      .then(({ data }: any) => setSiteContent(data || []));
   }, []);
 
   const getContent = (key: string) => siteContent.find(c => c.section_key === key);

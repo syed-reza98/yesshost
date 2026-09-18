@@ -1,3 +1,4 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, PhoneOff, MicOff, Mic } from "lucide-react";
 import type { CallStatus } from "@/hooks/useWebRTCCall";

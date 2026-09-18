@@ -1,3 +1,4 @@
+"use client";
 import { useRef, useCallback, useEffect } from "react";
 
 /** Generates a repeating ringtone using Web Audio API — no external files needed. */

@@ -1,3 +1,4 @@
+"use client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import bkashLogo from "@/assets/partners/bkash.svg";
 import nagadLogo from "@/assets/partners/nagad.svg";
@@ -9,14 +10,14 @@ import darazLogo from "@/assets/partners/daraz.png";
 import sslLogo from "@/assets/partners/ssl-wireless.png";
 
 const partners = [
-  { name: "bKash", logo: bkashLogo },
-  { name: "Nagad", logo: nagadLogo },
-  { name: "Grameenphone", logo: gpLogo },
-  { name: "Robi", logo: robiLogo },
-  { name: "Banglalink", logo: banglalinkLogo },
-  { name: "Pathao", logo: pathaoLogo },
-  { name: "Daraz", logo: darazLogo },
-  { name: "SSLCommerz", logo: sslLogo },
+  { name: "bKash", logo: bkashLogo.src },
+  { name: "Nagad", logo: nagadLogo.src },
+  { name: "Grameenphone", logo: gpLogo.src },
+  { name: "Robi", logo: robiLogo.src },
+  { name: "Banglalink", logo: banglalinkLogo.src },
+  { name: "Pathao", logo: pathaoLogo.src },
+  { name: "Daraz", logo: darazLogo.src },
+  { name: "SSLCommerz", logo: sslLogo.src },
 ];
 
 const TrustedBySection = () => {

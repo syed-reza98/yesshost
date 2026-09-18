@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
@@ -11,7 +12,7 @@ const FAQSection = () => {
 
   useEffect(() => {
     supabase.from("faqs").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }) => setDbFaqs(data || []));
+      .then(({ data }: any) => setDbFaqs(data || []));
   }, []);
 
   const faqs = dbFaqs.length > 0 ? dbFaqs.map(f => ({

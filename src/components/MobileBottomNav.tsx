@@ -1,3 +1,4 @@
+"use client";
 import { Home, Grid3X3, Headphones, User, ShoppingCart, Globe2, Server, Zap, Crown, Wifi, Users, WifiHigh, MonitorSmartphone, HardDrive, MapPin, Mail, Radio, Palette, ListOrdered, X, ShoppingBag, Search, Brush } from "lucide-react";
 import { Link, useLocation } from "@/lib/router-compat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,7 +89,7 @@ const MobileBottomNav = () => {
 
       if (data) {
         const map: Record<string, string> = {};
-        data.forEach((plan) => {
+        data.forEach((plan: any) => {
           const numericPrice = parseFloat(toEnDigits(plan.price_bdt.replace(/,/g, "")));
           if (!map[plan.slug] || numericPrice < parseFloat(toEnDigits(map[plan.slug].replace(/,/g, "")))) {
             map[plan.slug] = plan.price_bdt;

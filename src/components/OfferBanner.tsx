@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { X, Star, Zap, Tag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";

@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { Phone, MessageCircle, Mail, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,7 +12,7 @@ const CTASection = () => {
   useEffect(() => {
     supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
       .in("section_key", ["cta_badge", "cta_title", "cta_subtitle", "cta_contacts"])
-      .then(({ data }) => setContent(data || []));
+      .then(({ data }: any) => setContent(data || []));
   }, []);
 
   const get = (key: string) => content.find(c => c.section_key === key);

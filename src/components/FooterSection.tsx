@@ -1,3 +1,4 @@
+"use client";
 import { Link } from "@/lib/router-compat";
 import logoWhite from "@/assets/logo-white.png";
 import bkashLogo from "@/assets/partners/bkash.png";
@@ -44,8 +45,8 @@ const FooterSection = () => {
   };
 
   const payments = [
-    { name: "bKash", logo: bkashLogo, type: "logo" },
-    { name: "Nagad", logo: nagadLogo, type: "logo" },
+    { name: "bKash", logo: bkashLogo.src, type: "logo" },
+    { name: "Nagad", logo: nagadLogo.src, type: "logo" },
     { name: "Rocket", icon: Wallet, type: "icon" },
     { name: "Visa", icon: CreditCard, type: "icon" },
     { name: "Mastercard", icon: CreditCard, type: "icon" },
@@ -71,7 +72,7 @@ const FooterSection = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Brand column */}
             <div className="lg:col-span-4">
-              <img src={logoWhite} alt="Yess Host" className="h-9 sm:h-10 mb-5" />
+              <img src={logoWhite.src} alt="Yess Host" className="h-9 sm:h-10 mb-5" />
               <p className="text-sm text-white/60 leading-relaxed mb-6 max-w-sm">
                 {tr("footer.desc")}
               </p>

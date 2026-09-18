@@ -1,3 +1,4 @@
+"use client";
 import { Outlet, useNavigate, useLocation } from "@/lib/router-compat";
 import {
   LayoutDashboard, LogOut, Menu, Globe, Headphones,
@@ -15,7 +16,7 @@ import logoWhite from "@/assets/logo-white.png";
 const SIDEBAR_W = 260;
 const SWIPE_THRESHOLD = 80;
 
-const CallCenterLayout = () => {
+const CallCenterLayout = ({ children }: { children?: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
@@ -56,7 +57,7 @@ const CallCenterLayout = () => {
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-7" /></Link>
+            <Link to="/"><img src={logoWhite.src} alt="Yess Host" className="h-7" /></Link>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-widest uppercase border border-primary/20">
               {bn ? "সাপোর্ট" : "Support"}
             </span>
@@ -230,7 +231,7 @@ const CallCenterLayout = () => {
         </header>
 
         <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
-          <Outlet />
+          {children ?? <Outlet />}
         </main>
       </div>
     </div>

@@ -1,3 +1,4 @@
+"use client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,7 @@ const DynamicLegalPage = ({ pageKey, fallbackTitle, fallbackSections, seoDescrip
 
   useEffect(() => {
     supabase.from("site_content").select("*").eq("page", pageKey).eq("is_active", true).order("sort_order")
-      .then(({ data }) => setContent(data || []));
+      .then(({ data }: any) => setContent(data || []));
   }, [pageKey]);
 
   const get = (key: string) => content.find(c => c.section_key === key);

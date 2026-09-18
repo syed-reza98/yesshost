@@ -1,3 +1,4 @@
+"use client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "@/lib/router-compat";
 import { ArrowRight } from "lucide-react";
@@ -12,14 +13,14 @@ import bannerDedicated from "@/assets/banners/dedicated-server.jpg";
 import bannerSsl from "@/assets/banners/ssl-certificate.jpg";
 
 const categories = [
-  { img: bannerDomain, titleBn: "ডোমেইন রেজিস্ট্রেশন", titleEn: "Domain Registration", link: "/services/domain", desc_bn: ".COM .NET .ORG .XYZ", desc_en: ".COM .NET .ORG .XYZ" },
-  { img: bannerWebHosting, titleBn: "ওয়েব হোস্টিং", titleEn: "Web Hosting", link: "/services/basic-hosting", desc_bn: "ফাস্ট ও সিকিউর হোস্টিং", desc_en: "Fast & Secure Hosting" },
-  { img: bannerVps, titleBn: "VPS সার্ভার", titleEn: "VPS Server", link: "/services/usa-vps", desc_bn: "ফুল রুট অ্যাক্সেস", desc_en: "Full Root Access" },
-  { img: bannerDedicated, titleBn: "ডেডিকেটেড সার্ভার", titleEn: "Dedicated Server", link: "/services/dedicated", desc_bn: "সম্পূর্ণ নিজস্ব সার্ভার", desc_en: "Your Own Powerful Server" },
-  { img: bannerReseller, titleBn: "রিসেলার হোস্টিং", titleEn: "Reseller Hosting", link: "/services/linux-reseller", desc_bn: "আপনার হোস্টিং বিজনেস", desc_en: "Start Your Hosting Business" },
-  { img: bannerThemeStore, titleBn: "থিম স্টোর", titleEn: "Theme Store", link: "/themes", desc_bn: "প্রিমিয়াম ওয়েবসাইট থিম", desc_en: "Premium Website Themes" },
-  { img: bannerEmail, titleBn: "ইমেইল হোস্টিং", titleEn: "Email Hosting", link: "/services/email-hosting", desc_bn: "প্রফেশনাল ইমেইল", desc_en: "Professional Email" },
-  { img: bannerSsl, titleBn: "SSL সার্টিফিকেট", titleEn: "SSL Certificate", link: "/services/ssl", desc_bn: "ওয়েবসাইট সিকিউরিটি", desc_en: "Secure Your Website" },
+  { img: bannerDomain.src, titleBn: "ডোমেইন রেজিস্ট্রেশন", titleEn: "Domain Registration", link: "/services/domain", desc_bn: ".COM .NET .ORG .XYZ", desc_en: ".COM .NET .ORG .XYZ" },
+  { img: bannerWebHosting.src, titleBn: "ওয়েব হোস্টিং", titleEn: "Web Hosting", link: "/services/basic-hosting", desc_bn: "ফাস্ট ও সিকিউর হোস্টিং", desc_en: "Fast & Secure Hosting" },
+  { img: bannerVps.src, titleBn: "VPS সার্ভার", titleEn: "VPS Server", link: "/services/usa-vps", desc_bn: "ফুল রুট অ্যাক্সেস", desc_en: "Full Root Access" },
+  { img: bannerDedicated.src, titleBn: "ডেডিকেটেড সার্ভার", titleEn: "Dedicated Server", link: "/services/dedicated", desc_bn: "সম্পূর্ণ নিজস্ব সার্ভার", desc_en: "Your Own Powerful Server" },
+  { img: bannerReseller.src, titleBn: "রিসেলার হোস্টিং", titleEn: "Reseller Hosting", link: "/services/linux-reseller", desc_bn: "আপনার হোস্টিং বিজনেস", desc_en: "Start Your Hosting Business" },
+  { img: bannerThemeStore.src, titleBn: "থিম স্টোর", titleEn: "Theme Store", link: "/themes", desc_bn: "প্রিমিয়াম ওয়েবসাইট থিম", desc_en: "Premium Website Themes" },
+  { img: bannerEmail.src, titleBn: "ইমেইল হোস্টিং", titleEn: "Email Hosting", link: "/services/email-hosting", desc_bn: "প্রফেশনাল ইমেইল", desc_en: "Professional Email" },
+  { img: bannerSsl.src, titleBn: "SSL সার্টিফিকেট", titleEn: "SSL Certificate", link: "/services/ssl", desc_bn: "ওয়েবসাইট সিকিউরিটি", desc_en: "Secure Your Website" },
 ];
 
 const CategoryScroller = () => {

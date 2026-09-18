@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
@@ -17,7 +18,7 @@ const HeroSection = () => {
   useEffect(() => {
     supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
       .order("sort_order")
-      .then(({ data }) => setSiteContent(data || []));
+      .then(({ data }: any) => setSiteContent(data || []));
   }, []);
 
   const getContent = (key: string) => siteContent.find(c => c.section_key === key) || null;
@@ -149,7 +150,7 @@ const HeroSection = () => {
           >
             <div className="relative flex items-center justify-center min-h-[400px]">
               <img
-                src={heroImg}
+                src={heroImg.src}
                 alt="Yess Host Corporate"
                 className="w-[360px] h-auto object-contain relative z-10 drop-shadow-xl"
               />

@@ -1,3 +1,4 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingCart, Trash2, ArrowRight, Globe, Server, Palette } from "lucide-react";
 import { useCart, CartItem } from "@/contexts/CartContext";

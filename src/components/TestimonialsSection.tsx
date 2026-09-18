@@ -1,3 +1,4 @@
+"use client";
 import { Star, Quote } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,15 +12,15 @@ import avatarTanvir from "@/assets/avatars/avatar-tanvir.jpg";
 import avatarNusrat from "@/assets/avatars/avatar-nusrat.jpg";
 import avatarArif from "@/assets/avatars/avatar-arif.jpg";
 
-const defaultAvatars = [avatarRahim, avatarFatima, avatarKamal, avatarTanvir, avatarNusrat, avatarArif];
+const defaultAvatars = [avatarRahim.src, avatarFatima.src, avatarKamal.src, avatarTanvir.src, avatarNusrat.src, avatarArif.src];
 
 const fallbackTestimonials = [
-  { name: "Rahim Ahmed", company: "TechBD Solutions", key: "testimonials.t1", avatar: avatarRahim, rating: 5 },
-  { name: "Fatima Khan", company: "ShopNow BD", key: "testimonials.t2", avatar: avatarFatima, rating: 5 },
-  { name: "Kamal Hossain", company: "DevStudio BD", key: "testimonials.t3", avatar: avatarKamal, rating: 5 },
-  { name: "Tanvir Rahman", company: "StartUp Dhaka", key: "testimonials.t1", avatar: avatarTanvir, rating: 5 },
-  { name: "Nusrat Jahan", company: "DesignHub BD", key: "testimonials.t2", avatar: avatarNusrat, rating: 5 },
-  { name: "Arif Islam", company: "CloudTech BD", key: "testimonials.t3", avatar: avatarArif, rating: 5 },
+  { name: "Rahim Ahmed", company: "TechBD Solutions", key: "testimonials.t1", avatar: avatarRahim.src, rating: 5 },
+  { name: "Fatima Khan", company: "ShopNow BD", key: "testimonials.t2", avatar: avatarFatima.src, rating: 5 },
+  { name: "Kamal Hossain", company: "DevStudio BD", key: "testimonials.t3", avatar: avatarKamal.src, rating: 5 },
+  { name: "Tanvir Rahman", company: "StartUp Dhaka", key: "testimonials.t1", avatar: avatarTanvir.src, rating: 5 },
+  { name: "Nusrat Jahan", company: "DesignHub BD", key: "testimonials.t2", avatar: avatarNusrat.src, rating: 5 },
+  { name: "Arif Islam", company: "CloudTech BD", key: "testimonials.t3", avatar: avatarArif.src, rating: 5 },
 ];
 
 const TestimonialCard = ({ item }: { item: { name: string; company: string; text: string; rating: number; avatarSrc: string } }) => (
@@ -55,7 +56,7 @@ const TestimonialsSection = () => {
 
   useEffect(() => {
     supabase.from("testimonials").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }) => setTestimonials(data || []));
+      .then(({ data }: any) => setTestimonials(data || []));
   }, []);
 
   const items = testimonials.length > 0

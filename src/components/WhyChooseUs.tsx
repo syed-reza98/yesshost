@@ -1,3 +1,4 @@
+"use client";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Shield, Clock, Headphones, Server, Award, Users } from "lucide-react";

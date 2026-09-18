@@ -1,7 +1,9 @@
+"use client";
 import { useState, useRef, useEffect, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-interface OptimizedImageProps extends ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
+  src?: string | any;
   /** Use priority for above-the-fold / LCP images */
   priority?: boolean;
   /** Optional blur-up placeholder color */
@@ -27,6 +29,7 @@ const OptimizedImage = ({
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(priority);
   const imgRef = useRef<HTMLImageElement>(null);
+  const resolvedSrc = typeof src === "object" && src && "src" in src ? (src as any).src : src;
 
   useEffect(() => {
     if (priority || !imgRef.current) return;
@@ -46,7 +49,7 @@ const OptimizedImage = ({
   return (
     <img
       ref={imgRef}
-      src={inView ? src : undefined}
+      src={inView ? resolvedSrc : undefined}
       alt={alt}
       loading={priority ? "eager" : "lazy"}
       decoding={priority ? "sync" : "async"}

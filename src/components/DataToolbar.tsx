@@ -1,3 +1,4 @@
+"use client";
 import { Search, Download, RefreshCw, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 

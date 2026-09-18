@@ -27,6 +27,7 @@ let entries: DebugLogEntry[] = load();
 const listeners = new Set<(e: DebugLogEntry[]) => void>();
 
 function load(): DebugLogEntry[] {
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
@@ -37,6 +38,7 @@ function load(): DebugLogEntry[] {
 }
 
 function persist() {
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
   } catch {

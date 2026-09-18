@@ -1,3 +1,4 @@
+"use client";
 import { Outlet, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import {
   LayoutDashboard, Users, Server, FileText, HeadphonesIcon,
@@ -22,7 +23,7 @@ import logoWhite from "@/assets/logo-white.png";
 const SIDEBAR_W = 260;
 const SWIPE_THRESHOLD = 80;
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -168,7 +169,7 @@ const AdminLayout = () => {
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Link to="/"><img src={logoWhite} alt="Yess Host" className="h-7" /></Link>
+            <Link to="/"><img src={logoWhite.src} alt="Yess Host" className="h-7" /></Link>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-destructive/10 text-destructive tracking-widest uppercase border border-destructive/20">
               Admin
             </span>
@@ -393,7 +394,7 @@ const AdminLayout = () => {
         </header>
 
         <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
-          <Outlet />
+          {children ?? <Outlet />}
         </main>
       </div>
       {/* Search Command Palette */}

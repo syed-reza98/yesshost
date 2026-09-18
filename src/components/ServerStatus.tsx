@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
@@ -19,7 +20,7 @@ const ServerStatus = () => {
   useEffect(() => {
     supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
       .in("section_key", ["server_title", "server_subtitle", "server_list"])
-      .then(({ data }) => setContent(data || []));
+      .then(({ data }: any) => setContent(data || []));
   }, []);
 
   const get = (key: string) => content.find(c => c.section_key === key);

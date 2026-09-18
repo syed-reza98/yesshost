@@ -1,3 +1,4 @@
+"use client";
 import { Outlet, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import {
@@ -64,7 +65,7 @@ interface TopMenuItem {
   children?: TopMenuChild[];
 }
 
-const DashboardLayout = () => {
+const DashboardLayout = ({ children }: { children?: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -116,7 +117,7 @@ const DashboardLayout = () => {
         supabase.from("invoices").select("id", { count: "exact", head: true }).eq("user_id", user.id).in("status", ["unpaid", "overdue"]),
       ]);
       if (txns) {
-        const balance = txns.reduce((acc, t) => {
+        const balance = txns.reduce((acc: number, t: any) => {
           return t.type === "deposit" || t.type === "refund"
             ? acc + Number(t.amount_bdt)
             : acc - Number(t.amount_bdt);
@@ -255,11 +256,11 @@ const DashboardLayout = () => {
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoWhite} alt="Yess Host" className="h-7" />
+            <img src={logoWhite.src} alt="Yess Host" className="h-7" />
           </Link>
         ) : (
           <Link to="/" className="flex justify-center w-full">
-            <img src={logoWhite} alt="Yess Host" className="h-5 w-5 object-contain" />
+            <img src={logoWhite.src} alt="Yess Host" className="h-5 w-5 object-contain" />
           </Link>
         )}
       </div>
@@ -714,7 +715,7 @@ const DashboardLayout = () => {
           </header>
 
           <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto bg-background">
-            <Outlet />
+            {children ?? <Outlet />}
           </main>
         </div>
       </div>
