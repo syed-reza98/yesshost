@@ -50,36 +50,50 @@ export async function GET(
     apiToken: server.whmApiToken,
   };
 
-  try {
-    let ssoUrl: string;
-
+  const generateTargetUrl = async () => {
     if (target === "filemanager") {
-      ssoUrl = await createCpanelSession(serverConfig, {
-        username: service.cpanelUsername,
+      return createCpanelSession(serverConfig, {
+        username: service.cpanelUsername!,
         service: "cpaneld",
         app: "FileManager_Home",
       });
     } else if (target === "phpmyadmin") {
-      ssoUrl = await createCpanelSession(serverConfig, {
-        username: service.cpanelUsername,
+      return createCpanelSession(serverConfig, {
+        username: service.cpanelUsername!,
         service: "cpaneld",
         app: "Database_phpMyAdmin",
       });
     } else if (target === "webmail") {
-      ssoUrl = await createCpanelSession(serverConfig, {
-        username: service.cpanelUsername,
+      return createCpanelSession(serverConfig, {
+        username: service.cpanelUsername!,
         service: "webmaild",
       });
     } else {
-      // Default: cPanel Home
-      ssoUrl = await createCpanelSession(serverConfig, {
-        username: service.cpanelUsername,
+      return createCpanelSession(serverConfig, {
+        username: service.cpanelUsername!,
         service: "cpaneld",
       });
     }
+  };
 
+  try {
+    const ssoUrl = await generateTargetUrl();
     return NextResponse.redirect(ssoUrl, 302);
   } catch (err: any) {
+    // If WHM returns user does not exist, trigger auto-provisioning and retry SSO
+    if (err.message && err.message.includes("because they do not exist")) {
+      try {
+        const { provisionHostingService } = await import("@/lib/whm");
+        const provisionResult = await provisionHostingService(service.id);
+        if (provisionResult.success) {
+          const ssoUrl = await generateTargetUrl();
+          return NextResponse.redirect(ssoUrl, 302);
+        }
+      } catch (provisionErr) {
+        console.error("SSO auto-provisioning fallback failed:", provisionErr);
+      }
+    }
+
     return NextResponse.json(
       { error: err.message || "Failed to generate SSO session" },
       { status: 500 }
