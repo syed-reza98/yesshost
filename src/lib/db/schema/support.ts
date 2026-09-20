@@ -11,6 +11,7 @@ export const supportTickets = mysqlTable("support_tickets", {
   department: varchar("department", { length: 50 }).notNull().default("technical"), // technical | billing | sales
   priority: varchar("priority", { length: 20 }).notNull().default("medium"), // low | medium | high | urgent
   status: varchar("status", { length: 20 }).notNull().default("open"), // open | in_progress | waiting_client | closed
+  firstResponseAt: timestamp("first_response_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

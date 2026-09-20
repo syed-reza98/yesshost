@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import DataToolbar from "@/components/DataToolbar";
 import EmptyState from "@/components/EmptyState";
+import { ticketSla, slaToneClass } from "@/lib/ticket-sla";
+import { formatGap, isSlowGap } from "@/lib/time-gap";
 
 type TicketItem = {
   id: string;
@@ -18,6 +20,7 @@ type TicketItem = {
   priority: string;
   status: string;
   createdAt: string;
+  firstResponseAt?: string | null;
   userName?: string | null;
   userEmail?: string | null;
 };
@@ -292,6 +295,7 @@ export default function AdminTicketsPage() {
                   <th className="px-4 py-3">{bn ? "গ্রাহক" : "Client"}</th>
                   <th className="px-4 py-3">{bn ? "বিভাগ" : "Department"}</th>
                   <th className="px-4 py-3">{bn ? "স্ট্যাটাস" : "Status"}</th>
+                  <th className="px-4 py-3">{bn ? "SLA অবস্থা" : "SLA Target"}</th>
                   <th className="px-4 py-3">{bn ? "তারিখ" : "Date"}</th>
                   <th className="px-4 py-3 text-right">{bn ? "অ্যাকশন" : "Action"}</th>
                 </tr>
@@ -299,6 +303,15 @@ export default function AdminTicketsPage() {
               <tbody className="divide-y divide-border">
                 {filtered.map((t) => {
                   const st = statusConfig[t.status] || statusConfig.open;
+                  const sla = ticketSla(
+                    {
+                      created_at: t.createdAt,
+                      priority: t.priority,
+                      first_response_at: t.firstResponseAt,
+                      status: t.status,
+                    },
+                    bn
+                  );
                   return (
                     <tr
                       key={t.id}
@@ -320,6 +333,11 @@ export default function AdminTicketsPage() {
                         <Badge variant="outline" className={st.color}>
                           {bn ? st.labelBn : st.labelEn}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${slaToneClass[sla.tone]}`}>
+                          {sla.label}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(t.createdAt).toLocaleDateString("en-GB")}

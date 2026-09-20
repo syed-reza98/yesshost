@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { FileText, Search, DollarSign, CheckCircle2, Clock, XCircle, Plus, Loader2 } from "lucide-react";
+import { FileText, Search, DollarSign, CheckCircle2, Clock, XCircle, Plus, Loader2, Share2, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,27 @@ export default function AdminBillingPage() {
       toast.error(e.message || "Failed to update invoice");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleShareInvoice = async (invoiceId: string) => {
+    try {
+      const res = await fetch("/api/invoice/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const url = `${window.location.origin}${data.shareUrl}`;
+        await navigator.clipboard.writeText(url);
+        toast.success(bn ? "শেয়ারেবল লিংক কপি হয়েছে!" : "Shareable invoice link copied to clipboard!");
+        window.open(data.shareUrl, "_blank");
+      } else {
+        toast.error("Failed to generate share link");
+      }
+    } catch {
+      toast.error("Error generating link");
     }
   };
 
@@ -169,7 +190,17 @@ export default function AdminBillingPage() {
                     <td className="px-4 py-3 text-right font-mono font-bold tabular-nums">
                       {formatAmount(inv.amountBdt, lang)}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleShareInvoice(inv.id)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                        title={bn ? "পাবলিক লিংক কপি করুন" : "Copy public link"}
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </Button>
+
                       {inv.status !== "paid" && (
                         <Button
                           size="sm"

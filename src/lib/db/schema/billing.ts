@@ -74,6 +74,19 @@ export const invoices = mysqlTable("invoices", {
   dueDate: timestamp("due_date").notNull(),
   paidAt: timestamp("paid_at"),
   description: text("description"),
+  shareToken: varchar("share_token", { length: 128 }).unique(),
+  shareExpiresAt: timestamp("share_expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const operatingExpenses = mysqlTable("operating_expenses", {
+  id: varchar("id", { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: varchar("title", { length: 255 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // server | salary | marketing | software | office | other
+  amountBdt: decimal("amount_bdt", { precision: 10, scale: 2 }).notNull(),
+  expenseDate: timestamp("expense_date").defaultNow().notNull(),
+  vendor: varchar("vendor", { length: 255 }),
+  note: text("note"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
