@@ -65,10 +65,10 @@ export default function SupportPinPage() {
     toast.success(bn ? "পিন কপি হয়েছে!" : "Support PIN copied to clipboard!");
   };
 
-  const remaining = Math.max(0, expiresAt - now);
+  const remaining = expiresAt > 0 ? Math.max(0, expiresAt - now) : 0;
   const mm = String(Math.floor(remaining / 60000)).padStart(2, "0");
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
-  const isExpired = remaining <= 0;
+  const isExpired = expiresAt > 0 && remaining <= 0;
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -114,7 +114,9 @@ export default function SupportPinPage() {
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
               <span>
-                {isExpired
+                {loading
+                  ? bn ? "পিন লোড হচ্ছে..." : "Loading PIN..."
+                  : isExpired
                   ? bn ? "পিনটির মেয়াদ শেষ হয়ে গেছে" : "PIN has expired"
                   : bn ? `মেয়াদ বাকি: ${mm} মিনিট ${ss} সেকেন্ড` : `Expires in: ${mm}:${ss}`}
               </span>
