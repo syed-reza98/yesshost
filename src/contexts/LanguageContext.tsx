@@ -344,11 +344,18 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 const STORAGE_KEY = "yh_lang";
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "en";
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved === "bn" || saved === "en" ? saved : "en";
-  });
+  const [lang, setLangState] = useState<Lang>("en");
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved === "bn" || saved === "en") {
+        setLangState(saved);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const setLang = (next: Lang) => {
     setLangState(next);

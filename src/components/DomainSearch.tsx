@@ -289,9 +289,11 @@ const DomainSearch = () => {
     const name = searchTerm.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "").replace(/\.\w+(\.\w+)?$/, "").replace(/\/.*$/, "");
     setSearchedName(name);
     try {
-      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain: searchTerm } });
-      if (error) throw error;
-      if (data?.results) setResults(data.results);
+      const res = await fetch(`/api/domains/check?domain=${encodeURIComponent(searchTerm)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.results) setResults(data.results);
+      }
     } catch (err) {
       console.error("Domain check failed:", err);
     } finally {
@@ -323,9 +325,10 @@ const DomainSearch = () => {
     setWhoisData({});
     setSuggestions([]);
     setSearchedName(name);
-    supabase.functions.invoke("check-domain", { body: { domain: name + ".com" } })
-      .then(({ data, error }: any) => {
-        if (!error && data?.results) setResults(data.results);
+    fetch(`/api/domains/check?domain=${encodeURIComponent(name + ".com")}`)
+      .then(r => r.json())
+      .then((data: any) => {
+        if (data?.results) setResults(data.results);
         setLoading(false);
       })
       .catch(() => setLoading(false));
