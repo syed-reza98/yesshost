@@ -29,7 +29,7 @@ const OfferBanner = () => {
   if (!visible) return null;
 
   return (
-    <div className="relative h-8 sm:h-9 flex items-center bg-primary text-primary-foreground overflow-hidden">
+    <div className="relative h-8 sm:h-9 flex items-center bg-card/75 text-foreground backdrop-blur-2xl border-b border-card/80 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.08)] overflow-hidden">
       <div className="flex-1 min-w-0 overflow-hidden">
         <div className="flex whitespace-nowrap" style={{ animation: "marquee 60s linear infinite" }}>
           {[...offers, ...offers].map((offer, i) => {
@@ -37,7 +37,7 @@ const OfferBanner = () => {
             return (
               <span
                 key={i}
-                className="inline-flex items-center gap-2 px-6 text-[11px] sm:text-xs font-medium tracking-wide"
+                className="inline-flex items-center gap-2 px-6 text-[11px] sm:text-xs font-semibold tracking-wide [&_svg]:text-primary"
               >
                 <Icon className="w-3.5 h-3.5 shrink-0 opacity-90" />
                 {bn ? offer.bn : offer.en}
@@ -49,7 +49,7 @@ const OfferBanner = () => {
 
       <button
         onClick={() => setVisible(false)}
-        className="shrink-0 h-full px-3 flex items-center border-l border-primary-foreground/20 hover:bg-primary-foreground/15 transition-colors"
+        className="shrink-0 h-full px-3 flex items-center border-l border-border/60 text-muted-foreground hover:bg-secondary/70 hover:text-foreground transition-colors"
         aria-label="Close"
       >
         <X className="w-3.5 h-3.5" />

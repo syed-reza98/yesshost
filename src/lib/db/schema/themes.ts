@@ -36,3 +36,18 @@ export const themeSellerPayouts = mysqlTable("theme_seller_payouts", {
   status: varchar("status", { length: 20 }).notNull().default("requested"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const themeSellerProfiles = mysqlTable("theme_seller_profiles", {
+  id: varchar("id", { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id", { length: 36 }).notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  displayName: varchar("display_name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  logoUrl: text("logo_url"),
+  bioBn: text("bio_bn"),
+  bioEn: text("bio_en"),
+  website: varchar("website", { length: 300 }),
+  isPublic: boolean("is_public").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+

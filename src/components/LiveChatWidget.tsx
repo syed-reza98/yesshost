@@ -134,10 +134,10 @@ export default function LiveChatWidget() {
   return (
     <>
       {/* Floating Chat Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] lg:bottom-6 right-4 lg:right-6 z-50">
         <button
           onClick={() => setOpen(!open)}
-          className="w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
+          className="w-13 h-13 lg:w-14 lg:h-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
           aria-label="Live Chat"
         >
           {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
@@ -151,7 +151,7 @@ export default function LiveChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[480px] bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-24 right-4 lg:right-6 z-50 w-96 max-w-[calc(100vw-2rem)] h-[480px] bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-primary text-primary-foreground flex items-center justify-between">
