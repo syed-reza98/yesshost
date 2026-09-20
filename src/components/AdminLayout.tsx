@@ -8,7 +8,6 @@ import {
   BarChart3, Wallet, Megaphone, UserCog, CreditCard
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -84,22 +83,23 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
     }
     setDbSearching(true);
     searchTimerRef.current = setTimeout(async () => {
-      const q = searchQuery.toLowerCase();
-      const [usersRes, servicesRes, ordersRes, ticketsRes, invoicesRes] = await Promise.all([
-        supabase.from("profiles").select("user_id, full_name, phone, company_name").or(`full_name.ilike.%${q}%,phone.ilike.%${q}%,company_name.ilike.%${q}%`).limit(5),
-        supabase.from("services").select("id, name, domain, status, service_type").or(`name.ilike.%${q}%,domain.ilike.%${q}%`).limit(5),
-        supabase.from("orders").select("id, order_number, status, total_bdt").ilike("order_number", `%${q}%`).limit(5),
-        supabase.from("support_tickets").select("id, ticket_number, subject, status").or(`ticket_number.ilike.%${q}%,subject.ilike.%${q}%`).limit(5),
-        supabase.from("invoices").select("id, invoice_number, status, amount_bdt").ilike("invoice_number", `%${q}%`).limit(5),
-      ]);
-      setDbResults({
-        users: usersRes.data || [],
-        services: servicesRes.data || [],
-        orders: ordersRes.data || [],
-        tickets: ticketsRes.data || [],
-        invoices: invoicesRes.data || [],
-      });
-      setDbSearching(false);
+      try {
+        const res = await fetch(`/api/admin/search?q=${encodeURIComponent(searchQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDbResults({
+            users: data.users || [],
+            services: data.services || [],
+            orders: data.orders || [],
+            tickets: data.tickets || [],
+            invoices: data.invoices || [],
+          });
+        }
+      } catch (err) {
+        console.error("Admin search error:", err);
+      } finally {
+        setDbSearching(false);
+      }
     }, 300);
     return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
   }, [searchQuery]);

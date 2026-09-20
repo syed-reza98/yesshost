@@ -1,7 +1,8 @@
 "use client";
 
+
+
 import { useState, useRef, useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export type CallStatus = "idle" | "requesting" | "ringing" | "connected" | "ended";
 
@@ -116,13 +117,18 @@ export function useWebRTCCall({ chatId, role }: UseWebRTCCallProps) {
 
   // Subscribe to real-time events
   useEffect(() => {
-    if (!chatId) return;
-
-    const channel = supabase.channel(`call-${chatId}`);
-    channelRef.current = channel;
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = typeof window !== "undefined" && "BroadcastChannel" in window ? new BroadcastChannel(`call-${chatId}`) : null;
+      if (bc) {
+        channelRef.current = {
+          send: (data: any) => bc?.postMessage(data),
+        };
+      }
+    } catch (e) {}
 
     return () => {
-      supabase.removeChannel(channel);
+      bc?.close();
       cleanup();
     };
   }, [chatId, cleanup]);

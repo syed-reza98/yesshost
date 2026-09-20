@@ -20,7 +20,6 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
-import { supabase } from "@/integrations/supabase/client";
 import logoWhite from "@/assets/logo-white.png";
 import NotificationBell from "@/components/NotificationBell";
 import { formatAmount } from "@/lib/formatPrice";
@@ -86,47 +85,30 @@ const DashboardLayout = ({ children }: { children?: React.ReactNode }) => {
   const overlayOpacity = useTransform(dragX, [0, -SIDEBAR_W], [1, 0]);
 
   useEffect(() => {
-    const checkAccess = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setIsReseller(false);
-        return;
-      }
-
-      const [{ data: adminRole }, { data: resellerRole }, { data: resellerPackages }] = await Promise.all([
-        supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
-        supabase.rpc("has_role", { _user_id: user.id, _role: "reseller" }),
-        supabase.from("reseller_packages").select("id").eq("user_id", user.id).limit(1),
-      ]);
-
-      setIsAdmin(!!adminRole);
-      setIsReseller(!!resellerRole || !!(resellerPackages && resellerPackages.length > 0));
-    };
-
-    checkAccess();
+    if (!user) {
+      setIsAdmin(false);
+      setIsReseller(false);
+      return;
+    }
+    setIsAdmin(user.role === "admin");
+    setIsReseller(user.role === "reseller");
   }, [user]);
 
-  // Fetch wallet balance & service count
+  // Fetch wallet balance & stats from native /api/dashboard/stats
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ data: txns }, { count }, { count: dCount }, { count: invCount }] = await Promise.all([
-        supabase.from("wallet_transactions").select("amount_bdt, type").eq("user_id", user.id).eq("status", "completed"),
-        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("services").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("service_type", "domain"),
-        supabase.from("invoices").select("id", { count: "exact", head: true }).eq("user_id", user.id).in("status", ["unpaid", "overdue"]),
-      ]);
-      if (txns) {
-        const balance = txns.reduce((acc: number, t: any) => {
-          return t.type === "deposit" || t.type === "refund"
-            ? acc + Number(t.amount_bdt)
-            : acc - Number(t.amount_bdt);
-        }, 0);
-        setWalletBalance(Math.max(0, balance));
+      try {
+        const res = await fetch("/api/dashboard/stats");
+        if (res.ok) {
+          const stats = await res.json();
+          setWalletBalance(stats.walletBalance || 0);
+          setServiceCount(stats.servicesCount || 0);
+          setUnpaidInvoiceCount(stats.unpaidInvoicesCount || 0);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard stats", err);
       }
-      setServiceCount(count || 0);
-      setDomainCount(dCount || 0);
-      setUnpaidInvoiceCount(invCount || 0);
     };
     fetchData();
   }, [user]);

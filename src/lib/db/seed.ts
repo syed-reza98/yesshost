@@ -275,9 +275,10 @@ async function seed() {
   console.log("✅ Seeded FAQs");
 
   // 9. Sample Customer Hosting Service & Invoices
-  const existingService = await db.query.services.findFirst({
-    where: eq(schema.services.userId, customerId),
-  });
+  if (customerId) {
+    const existingService = await db.query.services.findFirst({
+      where: eq(schema.services.userId, customerId),
+    });
 
   if (!existingService) {
     const server = await db.query.servers.findFirst();
@@ -294,18 +295,19 @@ async function seed() {
         id: serviceId,
         userId: customerId,
         serverId: server.id,
-        planId: plan.id,
+        packageName: plan.name,
         name: "Starter Shared Hosting",
         domain: "tanvirtech.com",
-        serviceType: "shared",
+        serviceType: "hosting",
         billingCycle: "annually",
         priceBdt: plan.annualPriceBdt || "1500.00",
         status: "active",
         cpanelUsername: "tanvirtech",
-        cpanelPasswordEncrypted: "SecureCpanelPass2026!",
-        serverIp: server.ipAddress,
         startDate: now,
         expiryDate: nextYear,
+        specs: {
+          serverIp: server.ipAddress,
+        },
       });
 
       await db.insert(schema.invoices).values({
@@ -334,6 +336,7 @@ async function seed() {
 
       console.log("✅ Seeded Sample Customer Active Service & Invoices (Paid & Unpaid)");
     }
+  }
   }
 
   console.log("🎉 Database seeding completed successfully!");

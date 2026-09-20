@@ -4,7 +4,6 @@ import { Check, Star, ShoppingCart, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
-import { supabase } from "@/integrations/supabase/client";
 import { BILLING_DURATIONS, calcDurationPrice, toBengaliNum, type BillingDuration } from "@/lib/billingDurations";
 
 type Plan = {
@@ -107,8 +106,14 @@ const PricingSection = () => {
   const [planDurations, setPlanDurations] = useState<Record<string, BillingDuration>>({});
 
   useEffect(() => {
-    supabase.from("pricing_plans").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }: any) => setDbPlans(data || []));
+    fetch("/api/data/public")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.pricingPlans) {
+          setDbPlans(data.pricingPlans);
+        }
+      })
+      .catch((err) => console.error("Failed to load public plans:", err));
   }, []);
 
   const tabs = [

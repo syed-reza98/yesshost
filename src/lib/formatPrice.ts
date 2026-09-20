@@ -36,8 +36,9 @@ export const formatPrice = (price: string | number, lang: string): string => {
  * @param lang - "bn" or "en"  
  * @returns Formatted string like "1,190" or "১,১৯০"
  */
-export const formatAmount = (amount: number, lang: string): string => {
-  const formatted = amount.toLocaleString("en-IN");
+export const formatAmount = (amount: number | string, lang: string): string => {
+  const num = typeof amount === "number" ? amount : Number(amount) || 0;
+  const formatted = num.toLocaleString("en-IN");
   if (lang === "bn") {
     return toBnDigits(formatted);
   }

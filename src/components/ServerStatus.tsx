@@ -2,8 +2,6 @@
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
 const defaultServers = [
   { location: "🇧🇩 Bangladesh", city: "Dhaka (BDIX)", latency: "5ms", load: 63 },
   { location: "🇨🇦 Canada", city: "Toronto", latency: "12ms", load: 34 },
@@ -15,13 +13,7 @@ const defaultServers = [
 
 const ServerStatus = () => {
   const { tr, lang } = useLanguage();
-  const [content, setContent] = useState<any[]>([]);
-
-  useEffect(() => {
-    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
-      .in("section_key", ["server_title", "server_subtitle", "server_list"])
-      .then(({ data }: any) => setContent(data || []));
-  }, []);
+  const [content] = useState<any[]>([]);
 
   const get = (key: string) => content.find(c => c.section_key === key);
   const text = (key: string, fallback: string) => {

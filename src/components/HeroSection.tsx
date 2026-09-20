@@ -3,23 +3,16 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Shield, Zap, Clock, Globe, ArrowRight, CheckCircle, Server, Mail, Lock, ShoppingBag, Layers, HardDrive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@/lib/router-compat";
-
 import heroImg from "@/assets/hero-corporate.png";
+
 const brandCurve = [0.2, 0.8, 0.2, 1] as const;
 const iconMap: Record<string, typeof Globe> = { Globe, Clock, Zap, Shield };
 
 const HeroSection = () => {
   const { tr, lang } = useLanguage();
   const bn = lang === "bn";
-  const [siteContent, setSiteContent] = useState<any[]>([]);
-
-  useEffect(() => {
-    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }: any) => setSiteContent(data || []));
-  }, []);
+  const [siteContent] = useState<any[]>([]);
 
   const getContent = (key: string) => siteContent.find(c => c.section_key === key) || null;
   const getText = (key: string, fallbackKey: string) => {

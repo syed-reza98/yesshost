@@ -7,7 +7,6 @@ import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice, toEnDigits } from "@/lib/formatPrice";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceItem {
   label: string;
@@ -78,24 +77,25 @@ const MobileBottomNav = () => {
   const [priceMap, setPriceMap] = useState<Record<string, string>>({});
   const bn = lang === "bn";
 
-  // Fetch minimum prices per slug from pricing_plans
+  // Fetch minimum prices per slug from public data
   useEffect(() => {
     const fetchPrices = async () => {
-      const { data } = await supabase
-        .from("pricing_plans")
-        .select("slug, price_bdt")
-        .eq("is_active", true)
-        .order("sort_order");
-
-      if (data) {
+      try {
+        const res = await fetch("/api/data/public");
+        if (!res.ok) return;
+        const data = await res.json();
+        const plans = data.pricingPlans || [];
         const map: Record<string, string> = {};
-        data.forEach((plan: any) => {
-          const numericPrice = parseFloat(toEnDigits(plan.price_bdt.replace(/,/g, "")));
+        plans.forEach((plan: any) => {
+          const price = plan.priceBdt || plan.price_bdt || "0";
+          const numericPrice = parseFloat(toEnDigits(price.replace(/,/g, "")));
           if (!map[plan.slug] || numericPrice < parseFloat(toEnDigits(map[plan.slug].replace(/,/g, "")))) {
-            map[plan.slug] = plan.price_bdt;
+            map[plan.slug] = price;
           }
         });
         setPriceMap(map);
+      } catch (err) {
+        console.error("Error fetching prices:", err);
       }
     };
     fetchPrices();

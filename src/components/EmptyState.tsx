@@ -9,10 +9,13 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   actionTo?: string;
+  actionHref?: string;
   onAction?: () => void;
 }
 
-const EmptyState = ({ icon: Icon, title, description, actionLabel, actionTo, onAction }: EmptyStateProps) => (
+const EmptyState = ({ icon: Icon, title, description, actionLabel, actionTo, actionHref, onAction }: EmptyStateProps) => {
+  const targetLink = actionTo || actionHref;
+  return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -23,9 +26,9 @@ const EmptyState = ({ icon: Icon, title, description, actionLabel, actionTo, onA
     </div>
     <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{title}</h3>
     <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">{description}</p>
-    {actionLabel && actionTo && (
+    {actionLabel && targetLink && (
       <Link
-        to={actionTo}
+        to={targetLink}
         className="inline-flex items-center gap-2 gradient-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
       >
         {actionLabel}
@@ -40,6 +43,7 @@ const EmptyState = ({ icon: Icon, title, description, actionLabel, actionTo, onA
       </button>
     )}
   </motion.div>
-);
+  );
+};
 
 export default EmptyState;

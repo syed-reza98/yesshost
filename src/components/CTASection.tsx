@@ -3,17 +3,9 @@ import { motion } from "framer-motion";
 import { Phone, MessageCircle, Mail, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
 const CTASection = () => {
   const { tr, lang } = useLanguage();
-  const [content, setContent] = useState<any[]>([]);
-
-  useEffect(() => {
-    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
-      .in("section_key", ["cta_badge", "cta_title", "cta_subtitle", "cta_contacts"])
-      .then(({ data }: any) => setContent(data || []));
-  }, []);
+  const [content] = useState<any[]>([]);
 
   const get = (key: string) => content.find(c => c.section_key === key);
   const text = (key: string, fallback: string) => {

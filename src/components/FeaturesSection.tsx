@@ -4,8 +4,6 @@ import { Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket, MousePoin
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "@/lib/router-compat";
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
 const iconMap: Record<string, typeof Globe> = {
   Globe, Server, HardDrive, Mail, Cpu, Lock, RefreshCw, Rocket,
   MousePointerClick, BarChart3, Shield, Headphones,
@@ -13,13 +11,7 @@ const iconMap: Record<string, typeof Globe> = {
 
 const FeaturesSection = () => {
   const { tr, lang } = useLanguage();
-  const [siteContent, setSiteContent] = useState<any[]>([]);
-
-  useEffect(() => {
-    supabase.from("site_content").select("*").eq("page", "home").eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }: any) => setSiteContent(data || []));
-  }, []);
+  const [siteContent] = useState<any[]>([]);
 
   const getContent = (key: string) => siteContent.find(c => c.section_key === key);
   const getText = (key: string, fallback: string) => {

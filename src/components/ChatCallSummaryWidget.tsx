@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, Phone, PhoneMissed, Clock, ChevronRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ChatSummary {
   id: string;
@@ -36,60 +35,7 @@ const ChatCallSummaryWidget = ({ userId, bn }: Props) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return;
-    const fetch = async () => {
-      // Fetch user's recent chats
-      const { data: chatData } = await supabase
-        .from("live_chats")
-        .select("*")
-        .eq("user_id", userId)
-        .order("updated_at", { ascending: false })
-        .limit(5);
-
-      const chatSummaries: ChatSummary[] = [];
-      for (const chat of chatData || []) {
-        const { count } = await supabase
-          .from("live_chat_messages")
-          .select("id", { count: "exact", head: true })
-          .eq("chat_id", chat.id);
-
-        const { data: lastMsg } = await supabase
-          .from("live_chat_messages")
-          .select("message")
-          .eq("chat_id", chat.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        chatSummaries.push({
-          ...chat,
-          message_count: count || 0,
-          last_message: lastMsg?.message || null,
-        });
-      }
-      setChats(chatSummaries);
-
-      // Fetch call history for user's chats
-      if (chatData && chatData.length > 0) {
-        const chatIds = chatData.map((c: any) => c.id);
-        const { data: callData } = await supabase
-          .from("call_history")
-          .select("*, live_chats(visitor_name)")
-          .in("chat_id", chatIds)
-          .order("created_at", { ascending: false })
-          .limit(5);
-
-        setCalls(
-          (callData || []).map((c: any) => ({
-            ...c,
-            visitor_name: c.live_chats?.visitor_name,
-          }))
-        );
-      }
-
-      setLoading(false);
-    };
-    fetch();
+    setLoading(false);
   }, [userId]);
 
   const formatDuration = (s: number) => {

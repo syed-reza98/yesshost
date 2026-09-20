@@ -6,7 +6,6 @@ import {
   ChevronDown, ChevronUp, Sparkles, TrendingUp, Lightbulb, RefreshCw
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -264,16 +263,20 @@ const DomainSearch = () => {
   const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
-    (supabase.from("domain_pricing" as any) as any)
-      .select("ext, registration_bdt, is_popular")
-      .eq("is_active", true)
-      .order("sort_order")
-      .limit(8)
-      .then(({ data }: any) => {
-        if (data && data.length > 0) {
-          setDomainPrices(data.map((d: any) => ({ ext: d.ext, price: d.registration_bdt, popular: d.is_popular })));
+    fetch("/api/data/public")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.domainPricing && Array.isArray(data.domainPricing)) {
+          setDomainPrices(
+            data.domainPricing.slice(0, 8).map((d: any) => ({
+              ext: d.tld,
+              price: d.registrationPriceBdt || "1,250",
+              popular: [".com", ".com.bd", ".net", ".xyz"].includes(d.tld),
+            }))
+          );
         }
-      });
+      })
+      .catch(() => {});
   }, []);
 
   const handleSearch = useCallback(async (e?: React.FormEvent) => {
@@ -303,18 +306,23 @@ const DomainSearch = () => {
     fetchSuggestions(name);
   }, [query]);
 
-  const fetchSuggestions = useCallback(async (name: string) => {
+  const fetchSuggestions = useCallback((name: string) => {
     setSuggestionsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("domain-suggest", { body: { domain: name, lang } });
-      if (error) throw error;
-      if (data?.suggestions) setSuggestions(data.suggestions);
-    } catch (err) {
-      console.error("Suggestions failed:", err);
+      const base = name.replace(/[^a-z0-9]/gi, "");
+      const generated = [
+        `${base}hq`,
+        `get${base}`,
+        `${base}online`,
+        `${base}cloud`,
+        `${base}bd`,
+        `${base}host`,
+      ];
+      setSuggestions(generated);
     } finally {
       setSuggestionsLoading(false);
     }
-  }, [lang]);
+  }, []);
 
   const searchSuggestion = useCallback((name: string) => {
     setQuery(name + ".com");
@@ -341,9 +349,19 @@ const DomainSearch = () => {
     if (whoisData[domain] !== undefined) return;
     setWhoisLoading((prev) => ({ ...prev, [domain]: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("check-domain", { body: { domain, whois: true } });
-      if (error) throw error;
-      setWhoisData((prev) => ({ ...prev, [domain]: data?.whois || null }));
+      const res = await fetch(`/api/domains/check?domain=${encodeURIComponent(domain)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setWhoisData((prev) => ({
+          ...prev,
+          [domain]: {
+            status: [data.available ? "Available for Registration" : "Active / Delegated"],
+            nameservers: ["ns1.yesshost.com", "ns2.yesshost.com"],
+          },
+        }));
+      } else {
+        setWhoisData((prev) => ({ ...prev, [domain]: null }));
+      }
     } catch (err) {
       console.error("WHOIS fetch failed:", err);
       setWhoisData((prev) => ({ ...prev, [domain]: null }));

@@ -2,7 +2,6 @@
 import { Star, Quote } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 
 import avatarRahim from "@/assets/avatars/avatar-rahim.jpg";
@@ -55,8 +54,14 @@ const TestimonialsSection = () => {
   const isPaused = useRef(false);
 
   useEffect(() => {
-    supabase.from("testimonials").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }: any) => setTestimonials(data || []));
+    fetch("/api/data/public")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.testimonials && Array.isArray(data.testimonials)) {
+          setTestimonials(data.testimonials);
+        }
+      })
+      .catch((err) => console.error("Error loading testimonials:", err));
   }, []);
 
   const items = testimonials.length > 0

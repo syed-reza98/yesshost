@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -11,8 +10,14 @@ const FAQSection = () => {
   const [dbFaqs, setDbFaqs] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("faqs").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }: any) => setDbFaqs(data || []));
+    fetch("/api/data/public")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.faqs) {
+          setDbFaqs(data.faqs);
+        }
+      })
+      .catch((err) => console.error("Failed to load FAQs:", err));
   }, []);
 
   const faqs = dbFaqs.length > 0 ? dbFaqs.map(f => ({

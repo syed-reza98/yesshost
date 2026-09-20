@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Bell, Check, CheckCheck, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,41 +32,56 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    if (data) setNotifications(data as Notification[]);
+    try {
+      const res = await fetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    }
   };
 
   useEffect(() => {
     fetchNotifications();
 
     if (!user) return;
-    const channel = supabase
-      .channel("notifications-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-        (payload: any) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev]);
-        }
-      )
-      .subscribe();
+    // Connect to native SSE stream for live updates
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("/api/realtime/stream");
+      es.addEventListener("notification", (e) => {
+        try {
+          const payload = JSON.parse(e.data);
+          if (payload) {
+            setNotifications((prev) => [payload, ...prev]);
+          }
+        } catch {}
+      });
+    } catch {}
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (es) es.close();
+    };
   }, [user]);
 
   const markAsRead = async (id: string) => {
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
-    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ markAll: true }),
+    });
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
   };
 

@@ -3,12 +3,15 @@ import { Search, Download, RefreshCw, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export type FilterOption = { value: string; label: string; count?: number };
+export type FilterGroup = { key: string; value: string; onChange: (v: string) => void; options: FilterOption[] };
 
 interface DataToolbarProps {
   search: string;
-  onSearch: (v: string) => void;
+  onSearch?: (v: string) => void;
+  onSearchChange?: (v: string) => void;
   placeholder?: string;
-  filters?: FilterOption[];
+  searchPlaceholder?: string;
+  filters?: (FilterOption | FilterGroup)[];
   activeFilter?: string;
   onFilter?: (v: string) => void;
   onExport?: () => void;
@@ -24,7 +27,9 @@ interface DataToolbarProps {
 const DataToolbar = ({
   search,
   onSearch,
+  onSearchChange,
   placeholder,
+  searchPlaceholder,
   filters,
   activeFilter,
   onFilter,
@@ -35,6 +40,8 @@ const DataToolbar = ({
 }: DataToolbarProps) => {
   const { lang } = useLanguage();
   const bn = lang === "bn";
+  const handleSearch = onSearch || onSearchChange || (() => {});
+  const effectivePlaceholder = placeholder || searchPlaceholder;
 
   return (
     <div className="space-y-3">
@@ -43,15 +50,15 @@ const DataToolbar = ({
           <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             value={search}
-            onChange={e => onSearch(e.target.value)}
-            placeholder={placeholder || (bn ? "খুঁজুন..." : "Search...")}
+            onChange={e => handleSearch(e.target.value)}
+            placeholder={effectivePlaceholder || (bn ? "খুঁজুন..." : "Search...")}
             aria-label={bn ? "খুঁজুন" : "Search"}
             className="w-full h-11 pl-9 pr-9 rounded-xl border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/30"
           />
           {search && (
             <button
               type="button"
-              onClick={() => onSearch("")}
+              onClick={() => handleSearch("")}
               aria-label={bn ? "মুছুন" : "Clear"}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:bg-secondary"
             >
@@ -85,25 +92,48 @@ const DataToolbar = ({
         </div>
       </div>
 
-      {filters && filters.length > 0 && onFilter && (
-        <div className="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar snap-x scroll-smooth py-0.5">
-          {filters.map(f => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => onFilter(f.value)}
-              className={`shrink-0 snap-start h-9 px-3 rounded-full text-xs font-semibold border transition-colors ${
-                activeFilter === f.value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card text-muted-foreground border-border hover:bg-secondary"
-              }`}
-            >
-              {f.label}
-              {typeof f.count === "number" && (
-                <span className="ml-1.5 opacity-70">{f.count}</span>
-              )}
-            </button>
-          ))}
+      {filters && filters.length > 0 && (
+        <div className="flex flex-wrap gap-2 py-0.5">
+          {filters.map((f: any, idx: number) => {
+            if (f.options && f.onChange) {
+              return (
+                <div key={f.key || idx} className="flex flex-wrap gap-1.5 items-center">
+                  {f.options.map((opt: FilterOption) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => f.onChange(opt.value)}
+                      className={`h-8 px-3 rounded-full text-xs font-semibold border transition-colors ${
+                        f.value === opt.value
+                          ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                          : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => onFilter?.(f.value)}
+                className={`h-8 px-3 rounded-full text-xs font-semibold border transition-colors ${
+                  activeFilter === f.value
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+                }`}
+              >
+                {f.label}
+                {typeof f.count === "number" && (
+                  <span className="ml-1.5 opacity-70">{f.count}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
