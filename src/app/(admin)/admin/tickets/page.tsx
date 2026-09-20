@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import DataToolbar from "@/components/DataToolbar";
+import EmptyState from "@/components/EmptyState";
 
 type TicketItem = {
   id: string;
@@ -271,6 +272,16 @@ export default function AdminTicketsPage() {
         <div className="p-16 text-center bg-card rounded-xl border border-border">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
         </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Headphones}
+          title={bn ? "কোনো সাপোর্ট টিকিট পাওয়া যায়নি" : "No Support Tickets Found"}
+          description={
+            bn
+              ? "বর্তমানে কোনো সক্রিয় সাপোর্ট টিকিট নেই বা ফিল্টারের সাথে মিলছে না।"
+              : "There are currently no support tickets matching your search criteria."
+          }
+        />
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
