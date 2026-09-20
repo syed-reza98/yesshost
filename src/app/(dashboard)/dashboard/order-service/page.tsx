@@ -154,11 +154,21 @@ export default function DashboardOrderServicePage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {visible.map((p) => {
-            const parsedFeatures = Array.isArray(p.features)
-              ? p.features
-              : typeof p.features === "object" && p.features !== null
-              ? Object.entries(p.features).map(([k, v]) => `${k}: ${v}`)
-              : [];
+            let parsedFeatures: string[] = [];
+            try {
+              if (Array.isArray(p.features)) {
+                parsedFeatures = p.features;
+              } else if (typeof p.features === "string") {
+                const parsed = JSON.parse(p.features);
+                parsedFeatures = Array.isArray(parsed)
+                  ? parsed
+                  : Object.entries(parsed).map(([k, v]) => `${k}: ${v}`);
+              } else if (typeof p.features === "object" && p.features !== null) {
+                parsedFeatures = Object.entries(p.features).map(([k, v]) => `${k}: ${v}`);
+              }
+            } catch {
+              parsedFeatures = [];
+            }
 
             const inCart = isInCart(p.id);
 
