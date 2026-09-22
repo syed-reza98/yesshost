@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && (cp -r public .next/standalone/ 2>/dev/null || true) && cp .env .next/standalone/.env",
+    "build:cpanel": "next build && cp -r .next/static .next/standalone/.next/ && (cp -r public .next/standalone/ 2>/dev/null || true)",
     "start": "node .next/standalone/server.js",
+    "start:cpanel": "node app.js",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",

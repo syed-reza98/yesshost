@@ -1,0 +1,24 @@
+# Disable directory listing
+Options -Indexes
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Tell Apache this app is served by Passenger Node.js
+PassengerEnabled on
+PassengerNodejs /usr/bin/node
+PassengerStartupFile app.js
+PassengerAppType node
+
+# Handle all requests through Passenger (Node.js app)
+# Serve static files directly from .next/static and public/
+RewriteCond %{REQUEST_URI} ^/_next/static/
+RewriteRule ^_next/static/(.*)$ .next/static/$1 [L]
+
+RewriteCond %{REQUEST_URI} ^/public/
+RewriteRule ^public/(.*)$ public/$1 [L]
+
+# Everything else goes to Node.js
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ app.js [QSA,L]
