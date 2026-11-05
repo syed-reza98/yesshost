@@ -1,31 +1,21 @@
 # 🚀 YessHost — cPanel Deployment Guide
 
-**Domain:** `host.yessbangla.top`  
-**Stack:** Next.js 15 (standalone) + MySQL (cPanel) + NextAuth v5
+**Domain:** `www.yesshost.com` / `yesshost.com`  
+**Server Host:** `s1321.sgp1.mysecurecloudhost.com` (IP: `192.250.235.43`)  
+**Stack:** Next.js 15 (standalone) + MySQL/MariaDB 10.6 (cPanel) + LiteSpeed Web Server + NextAuth v5
 
 ---
 
-## Prerequisites Checklist
+## Production Credentials & Database
 
-Before starting, confirm with your host:
-- [ ] cPanel has **"Setup Node.js App"** feature (Phusion Passenger)
-- [ ] Node.js **18+** is available
-- [ ] SSH access or Terminal in cPanel is available
-- [ ] MySQL database is created (see Step 1)
-
----
-
-## Step 1 — Create MySQL Database in cPanel
-
-1. Log in to **cPanel** → scroll to **Databases** → click **MySQL Databases**
-2. Under **Create New Database**, type `yesshost` → click **Create Database**
-   - Full DB name will be: `yessban2_yesshost` ✅ (already created)
-3. Under **MySQL Users**, create a user:
-   - Username: `syed` → Full: `yessban2_syed` ✅
-   - Password: `oushodhwala2026` ✅
-4. Under **Add User To Database**, select the user and database → click **Add** → grant **ALL PRIVILEGES**
-
-> Your credentials are already set. This step is for reference.
+- **cPanel Username:** `yesshost`
+- **MySQL Database:** `yesshost_yesshost`
+- **MySQL User:** `yesshost_dbuser`
+- **MySQL Password:** `YessHost_Db_2026!Secure`
+- **Database Connection URI:** `mysql://yesshost_dbuser:YessHost_Db_2026!Secure@127.0.0.1:3306/yesshost_yesshost`
+- **Node.js Version:** 20.x LTS (Virtual Environment: `/home/yesshost/nodevenv/app/20/bin/node`)
+- **Application Root:** `/home/yesshost/app`
+- **Web Document Root:** `/home/yesshost/public_html`
 
 ---
 
@@ -296,14 +286,16 @@ Or use **Setup Node.js App** → **Restart** button in cPanel.
 
 | Item | Value |
 |------|-------|
-| Domain | `host.yessbangla.top` |
-| App Root | `~/host.yessbangla.top/` |
+| Domain | `yesshost.com` / `www.yesshost.com` |
+| Server Host | `s1321.sgp1.mysecurecloudhost.com` (`192.250.235.43`) |
+| App Root | `/home/yesshost/app/` |
 | Startup File | `app.js` |
-| DB Host | `127.0.0.1` |
-| DB Name | `yessban2_yesshost` |
-| DB User | `yessban2_syed` |
-| DB Pass | `oushodhwala2026` |
-| Node.js Version | 18.x or 20.x |
+| DB Host | `127.0.0.1:3306` |
+| DB Name | `yesshost_yesshost` |
+| DB User | `yesshost_dbuser` |
+| DB Pass | `YessHost_Db_2026!Secure` |
+| Node.js Version | 20.x (CloudLinux alt-nodejs20) |
+| Web Server | LiteSpeed Web Server |
 | App Mode | Production |
 
 ---
