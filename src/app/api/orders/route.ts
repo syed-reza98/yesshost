@@ -12,11 +12,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const isAdmin = (session.user as any)?.role === "admin";
+  const isStaff = (session.user as any)?.role === "admin" || (session.user as any)?.role === "call_center";
 
   try {
     const list = await db.query.orders.findMany({
-      where: isAdmin ? undefined : eq(orders.userId, session.user.id),
+      where: isStaff ? undefined : eq(orders.userId, session.user.id),
       orderBy: [desc(orders.createdAt)],
     });
 

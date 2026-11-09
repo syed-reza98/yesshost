@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Palette, ExternalLink, ShoppingCart, Loader2, Star, Eye } from "lucide-react";
+import { Link } from "@/lib/router-compat";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { formatAmount } from "@/lib/formatPrice";
@@ -95,7 +96,9 @@ export default function ThemesPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                   {t.category}
                 </span>
-                <h3 className="font-bold text-base text-foreground mt-1">{t.name}</h3>
+                <Link href={`/themes/${(t as any).slug || t.id}`}>
+                  <h3 className="font-bold text-base text-foreground mt-1 hover:text-primary transition-colors cursor-pointer">{t.name}</h3>
+                </Link>
               </div>
 
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
