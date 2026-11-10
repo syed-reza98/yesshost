@@ -186,7 +186,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`relative w-full transition-all duration-300 bg-background/95 backdrop-blur-xl border-b ${
+    <nav className={`sticky top-0 z-50 w-full transition-all duration-300 bg-background/95 backdrop-blur-xl border-b ${
       scrolled
         ? "border-border/60 shadow-lg shadow-black/5"
         : "border-border/40"
