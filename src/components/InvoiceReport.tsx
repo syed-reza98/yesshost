@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, X } from "lucide-react";
-import logoWhite from "@/assets/logo-white.png";
+import logo from "@/assets/logo.png";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -173,7 +173,7 @@ const InvoiceReport = ({ invoice, open, onClose }: InvoiceReportProps) => {
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, paddingBottom: 20, borderBottom: "3px solid #0ea5e9" }}>
               <div className="logo-section">
-                <img src={logoWhite.src} alt="Yess Host" style={{ height: 40, filter: "brightness(0) saturate(100%)" }} />
+                <img src={logo.src} alt="Yess Host" style={{ height: 40, width: "auto", objectFit: "contain", filter: "brightness(0) saturate(100%)" }} />
                 <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 4, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
                   Premium Hosting Solutions
                 </p>

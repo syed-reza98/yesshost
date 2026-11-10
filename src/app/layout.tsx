@@ -14,6 +14,15 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Yess Host - Web Hosting, Cloud & Domain Solutions",
   description: "Enterprise cPanel & Cloud Hosting, Domains, Reseller Studio and WordPress Theme Marketplace in Bangladesh.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png" },
+    ],
+  },
 };
 
 export default function RootLayout({

@@ -20,7 +20,8 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
-import logoWhite from "@/assets/logo-white.png";
+import logo from "@/assets/logo.png";
+import icon from "@/assets/icon.png";
 import NotificationBell from "@/components/NotificationBell";
 import { formatAmount } from "@/lib/formatPrice";
 
@@ -238,11 +239,11 @@ const DashboardLayout = ({ children }: { children?: React.ReactNode }) => {
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoWhite.src} alt="Yess Host" className="h-7" />
+            <img src={logo.src} alt="Yess Host" className="h-7 w-auto object-contain" />
           </Link>
         ) : (
           <Link to="/" className="flex justify-center w-full">
-            <img src={logoWhite.src} alt="Yess Host" className="h-5 w-5 object-contain" />
+            <img src={icon.src} alt="Yess Host" className="h-6 w-6 object-contain" />
           </Link>
         )}
       </div>

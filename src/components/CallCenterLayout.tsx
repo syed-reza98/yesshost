@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "@/lib/router-compat";
-import logoWhite from "@/assets/logo-white.png";
+import logo from "@/assets/logo.png";
 
 const SIDEBAR_W = 260;
 const SWIPE_THRESHOLD = 80;
@@ -57,7 +57,7 @@ const CallCenterLayout = ({ children }: { children?: React.ReactNode }) => {
       <div className="h-16 flex items-center px-4 border-b border-border/40 shrink-0">
         {!collapsed ? (
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <Link to="/"><img src={logoWhite.src} alt="Yess Host" className="h-7" /></Link>
+            <Link to="/"><img src={logo.src} alt="Yess Host" className="h-7 w-auto object-contain" /></Link>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-widest uppercase border border-primary/20">
               {bn ? "সাপোর্ট" : "Support"}
             </span>

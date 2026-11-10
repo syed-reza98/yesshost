@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import NotificationBell from "@/components/NotificationBell";
-import logoWhite from "@/assets/logo-white.png";
+import logo from "@/assets/logo.png";
 
 interface NavChild {
   label: string;
@@ -193,7 +193,7 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
         <Link to="/" className="flex items-center shrink-0 mr-4 xl:mr-8">
-          <img src={logoWhite.src} alt="Yess Host" className="h-8 lg:h-10" />
+          <img src={logo.src} alt="Yess Host" className="h-8 lg:h-10 w-auto object-contain" />
         </Link>
 
         {/* Desktop */}
