@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   description: "Enterprise cPanel & Cloud Hosting, Domains, Reseller Studio and WordPress Theme Marketplace in Bangladesh.",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico?v=2" },
+      { url: "/icon.png?v=2", type: "image/png" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png" },
+      { url: "/apple-touch-icon.png?v=2" },
     ],
   },
 };
